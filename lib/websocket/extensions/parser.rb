@@ -72,7 +72,7 @@ module WebSocket
           end
         end
 
-        params.each { |key, value| print[key, value] }
+        params.keys.sort.each { |key| print[key, params[key]] }
 
         ([name] + values).join('; ')
       end
@@ -88,6 +88,16 @@ module WebSocket
         @by_name[name] ||= []
         @by_name[name].push(params)
         @in_order.push(:name => name, :params => params)
+      end
+
+      def each_offer(&block)
+        @in_order.each do |offer|
+          block.call(offer[:name], offer[:params])
+        end
+      end
+
+      def by_name(name)
+        @by_name[name] || []
       end
 
       def to_a
