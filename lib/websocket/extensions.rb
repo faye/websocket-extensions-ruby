@@ -129,6 +129,7 @@ module WebSocket
       (allowed[:rsv2] || !frame.rsv2) &&
       (allowed[:rsv3] || !frame.rsv3)
     end
+    alias :valid_frame_rsv? :valid_frame_rsv
 
     def process_incoming_message(message)
       @sessions.reverse.inject(message) do |msg, session|
