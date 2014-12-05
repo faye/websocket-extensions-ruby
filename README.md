@@ -35,9 +35,9 @@ representation of frames and messages.
 The APIs provided by the framework rely on two data types; extensions will
 expect to be given data and to be able to return data in these formats:
 
-#### `Frame`
+#### *Frame*
 
-`Frame` is a structure representing a single WebSocket frame of any type. Frames
+*Frame* is a structure representing a single WebSocket frame of any type. Frames
 are simple objects that must have at least the following properties, which
 represent the data encoded in the frame:
 
@@ -50,26 +50,20 @@ represent the data encoded in the frame:
 | `opcode`      | the numeric opcode (`0`, `1`, `2`, `8`, `9`, or `10`) of the frame |
 | `masked`      | `true` if the `MASK` bit is set, `false` otherwise                 |
 | `masking_key` | a 4-byte `Array` if `masked` is `true`, otherwise `nil`            |
-| `length`      | the numeric length of the frame's payload                          |
 | `payload`     | an `Array` of bytes containing the (unmasked) application data     |
 
-If an extension modifies any of these fields, it should make sure it leaves the
-frame in a consistent state, e.g. `length` must mirror the actual length of
-`payload` at all times.
+#### *Message*
 
-#### `Message`
-
-A `Message` represents a complete application message, which can be formed from
+A *Message* represents a complete application message, which can be formed from
 text, binary and continuation frames. It has the following properties:
 
-| property | description                                                |
-| -------- | ---------------------------------------------------------- |
-| `frames` | an array of `Frame` objects                                |
-| `data`   | the concatenation of all the frame payloads in the message |
-
-Again, if an extension modifies a `Message` it must leave it in a consistent
-state such that `data` is equal to the concatenated payloads in the `frames`
-array.
+| property | description                                                       |
+| -------- | ----------------------------------------------------------------- |
+| `rsv1`   | `true` if the first frame of the message has the `RSV1` bit set   |
+| `rsv2`   | `true` if the first frame of the message has the `RSV2` bit set   |
+| `rsv3`   | `true` if the first frame of the message has the `RSV3` bit set   |
+| `opcode` | the numeric opcode (`1` or `2`) of the first frame of the message |
+| `data`   | the concatenation of all the frame payloads in the message        |
 
 ### For driver authors
 
@@ -147,7 +141,7 @@ Both clients and servers will use the methods `valid_frame_rsv(frame)`,
 
 The WebSocket protocol requires that frames do not have any of the `RSV` bits
 set unless there is an extension in use that allows otherwise. When processing
-an incoming frame, sessions should pass a `Frame` object to:
+an incoming frame, sessions should pass a *Frame* object to:
 
 ```rb
 exts.valid_frame_rsv(frame)
@@ -157,7 +151,7 @@ If this method returns `false`, the session should fail the WebSocket connection
 with closing code `1002`.
 
 To pass incoming messages through the extension stack, a session should
-construct a `Message` object according to the above datatype definitions, and
+construct a *Message* object according to the above datatype definitions, and
 call:
 
 ```rb
@@ -169,7 +163,7 @@ error and the session should fail the WebSocket connection with closing code
 `1010`. Otherwise, `message` should be passed on to the application.
 
 To pass outgoing messages through the extension stack, a session should
-construct a `Message` as before, and call:
+construct a *Message* as before, and call:
 
 ```rb
 message = exts.process_outgoing_message(message)
@@ -177,8 +171,9 @@ message = exts.process_outgoing_message(message)
 
 If any extensions fail to process the message, then this call will `raise` an
 error and the session should fail the WebSocket connection with closing code
-`1010`. Otherwise, each frame in `message.frames` should be written to the
-transport, after applying `frame.masking_key` to `frame.payload` if required.
+`1010`. Otherwise, `message` should be converted into frames (with the message's
+`rsv1`, `rsv2`, `rsv3` and `opcode` set on the first frame) and written to the
+transport.
 
 At the end of the WebSocket session (either when the protocol is explicitly
 ended or the transport connection disconnects), the driver should call:
@@ -213,13 +208,13 @@ It must also implement the following methods:
 ext.create_client_session
 ```
 
-This returns a `ClientSession`, whose interface is defined below.
+This returns a *ClientSession*, whose interface is defined below.
 
 ```rb
 ext.create_server_session(offers)
 ```
 
-This takes an array of offer params and returns a `ServerSession`, whose
+This takes an array of offer params and returns a *ServerSession*, whose
 interface is defined below. For example, if the client handshake contains the
 offer header:
 
@@ -238,13 +233,13 @@ ext.create_server_session([
 ```
 
 The extension must decide which set of parameters it wants to accept, if any,
-and return a `ServerSession` if it wants to accept the parameters and `nil`
+and return a *ServerSession* if it wants to accept the parameters and `nil`
 otherwise.
 
-#### `ClientSession`
+#### *ClientSession*
 
-A `ClientSession` is the type returned by `ext.create_client_session`. It must
-implement the following methods, as well as the `Session` API listed below.
+A *ClientSession* is the type returned by `ext.create_client_session`. It must
+implement the following methods, as well as the *Session* API listed below.
 
 ```rb
 clientSession.generate_offer
@@ -268,10 +263,10 @@ parameters, then this method must return `true`. If it returns any other value,
 the framework will interpret this as the client rejecting the response, and will
 `raise`.
 
-#### `ServerSession`
+#### *ServerSession*
 
-A `ServerSession` is the type returned by `ext.create_server_session(offers)`. It
-must implement the following methods, as well as the `Session` API listed below.
+A *ServerSession* is the type returned by `ext.create_server_session(offers)`. It
+must implement the following methods, as well as the *Session* API listed below.
 
 ```rb
 serverSession.generate_response
@@ -283,9 +278,9 @@ This returns the set of parameters the server session wants to send in its
 returned to the client per extension. Server sessions that would confict on
 their use of RSV bits are not activated.
 
-#### `Session`
+#### *Session*
 
-The `Session` API must be implemented by both client and server sessions. It
+The *Session* API must be implemented by both client and server sessions. It
 contains three methods: `valid_frame_rsv(frame)`,
 `process_incoming_message(message)` and `process_outgoing_message(message)`.
 
@@ -293,7 +288,7 @@ contains three methods: `valid_frame_rsv(frame)`,
 session.valid_frame_rsv(frame)
 ```
 
-This takes a `Frame` as defined above, and returns a response indicating which
+This takes a *Frame* as defined above, and returns a response indicating which
 RSV bits are allowed to be set on the frame. (If a session is having this method
 called, the session is active and should its bits can be used.) For example, the
 `permessage-deflate` extension allows the RSV1 bit to be set on `text` and
@@ -317,7 +312,7 @@ session indicates otherwise.
 message = session.process_incoming_message(message)
 ```
 
-The session must implement this method to take an incoming `Message` as defined
+The session must implement this method to take an incoming *Message* as defined
 above, transform it in any way it needs, then return it. If there is an error
 processing the message, this method should `raise` an error.
 
@@ -325,7 +320,7 @@ processing the message, this method should `raise` an error.
 message = session.process_outgoing_message(message)
 ```
 
-The session must implement this method to take an outgoing `Message` as defined
+The session must implement this method to take an outgoing *Message* as defined
 above, transform it in any way it needs, then return it. If there is an error
 processing the message, this method should `raise` an error.
 
