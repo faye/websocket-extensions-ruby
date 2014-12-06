@@ -242,7 +242,7 @@ A *ClientSession* is the type returned by `ext.create_client_session`. It must
 implement the following methods, as well as the *Session* API listed below.
 
 ```rb
-clientSession.generate_offer
+client_session.generate_offer
 # e.g.  -> [
 #            {'server_no_context_takeover' => true, 'server_max_window_bits' => 8},
 #            {'server_max_window_bits' => 15}
@@ -254,7 +254,7 @@ This must return a set of parameters to include in the client's
 configurations, it can return an array of sets of parameters as shown above.
 
 ```rb
-clientSession.activate(params) # -> true
+client_session.activate(params) # -> true
 ```
 
 This must take a single set of parameters from the server's handshake response
@@ -269,7 +269,7 @@ A *ServerSession* is the type returned by `ext.create_server_session(offers)`. I
 must implement the following methods, as well as the *Session* API listed below.
 
 ```rb
-serverSession.generate_response
+server_session.generate_response
 # e.g.  -> {'server_max_window_bits' => 8}
 ```
 
