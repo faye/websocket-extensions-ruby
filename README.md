@@ -49,8 +49,8 @@ represent the data encoded in the frame:
 | `rsv3`        | `true` if the `RSV3` bit is set, `false` otherwise                 |
 | `opcode`      | the numeric opcode (`0`, `1`, `2`, `8`, `9`, or `10`) of the frame |
 | `masked`      | `true` if the `MASK` bit is set, `false` otherwise                 |
-| `masking_key` | a 4-byte `Array` if `masked` is `true`, otherwise `nil`            |
-| `payload`     | an `Array` of bytes containing the (unmasked) application data     |
+| `masking_key` | a 4-byte string if `masked` is `true`, otherwise `nil`             |
+| `payload`     | a string containing the (unmasked) application data                |
 
 #### *Message*
 
