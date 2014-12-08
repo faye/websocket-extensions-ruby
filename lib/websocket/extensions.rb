@@ -52,8 +52,9 @@ module WebSocket
         session = ext.create_client_session
         next unless session
 
-        sessions.push(session)
-        index[ext.name] = {:ext => ext, :session => session}
+        record = [ext, session]
+        sessions.push(record)
+        index[ext.name] = record
 
         offers = session.generate_offer
         offers = offers ? [offers].flatten : []
@@ -78,8 +79,7 @@ module WebSocket
           raise ExtensionError, %Q{Server sent am extension response for unknown extension "#{name}"}
         end
 
-        ext     = record[:ext]
-        session = record[:session]
+        ext, session = *record
 
         if reserved = reserved?(ext)
           raise ExtensionError, %Q{Server sent two extension responses that use the RSV#{reserved[0]} } +
@@ -91,7 +91,7 @@ module WebSocket
         end
 
         reserve(ext)
-        @sessions.push(session)
+        @sessions.push(record)
       end
     end
 
@@ -107,7 +107,7 @@ module WebSocket
         next unless session = ext.create_server_session(offer)
 
         reserve(ext)
-        sessions.push(session)
+        sessions.push([ext, session])
         response.push(Parser.serialize_params(ext.name, session.generate_response))
       end
 
@@ -118,7 +118,7 @@ module WebSocket
     def valid_frame_rsv(frame)
       allowed = {:rsv1 => false, :rsv2 => false, :rsv3 => false}
 
-      @sessions.each do |session|
+      @sessions.each do |ext, session|
         policy = session.valid_frame_rsv(frame)
         allowed[:rsv1] ||= policy[:rsv1]
         allowed[:rsv2] ||= policy[:rsv2]
@@ -132,23 +132,27 @@ module WebSocket
     alias :valid_frame_rsv? :valid_frame_rsv
 
     def process_incoming_message(message)
-      @sessions.reverse.inject(message) do |msg, session|
-        session.process_incoming_message(msg)
+      @sessions.reverse.inject(message) do |msg, (ext, session)|
+        begin
+          session.process_incoming_message(msg)
+        rescue => error
+          raise ExtensionError, [ext.name, error.message].join(': ')
+        end
       end
-    rescue => e
-      raise ExtensionError, e.message
     end
 
     def process_outgoing_message(message)
-      @sessions.inject(message) do |msg, session|
-        session.process_outgoing_message(msg)
+      @sessions.inject(message) do |msg, (ext, session)|
+        begin
+          session.process_outgoing_message(msg)
+        rescue => error
+          raise ExtensionError, [ext.name, error.message].join(': ')
+        end
       end
-    rescue => e
-      raise ExtensionError, e.message
     end
 
     def close
-      @sessions.each do |session|
+      @sessions.each do |ext, session|
         session.close rescue nil
       end
     end
