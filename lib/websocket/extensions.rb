@@ -5,6 +5,8 @@ module WebSocket
 
     ExtensionError = Class.new(ArgumentError)
 
+    MESSAGE_OPCODES = [1, 2]
+
     def initialize
       @rsv1 = @rsv2 = @rsv3 = nil
 
@@ -118,11 +120,12 @@ module WebSocket
     def valid_frame_rsv(frame)
       allowed = {:rsv1 => false, :rsv2 => false, :rsv3 => false}
 
-      @sessions.each do |ext, session|
-        policy = session.valid_frame_rsv(frame)
-        allowed[:rsv1] ||= policy[:rsv1]
-        allowed[:rsv2] ||= policy[:rsv2]
-        allowed[:rsv3] ||= policy[:rsv3]
+      if MESSAGE_OPCODES.include?(frame.opcode)
+        @sessions.each do |ext, session|
+          allowed[:rsv1] ||= ext.rsv1
+          allowed[:rsv2] ||= ext.rsv2
+          allowed[:rsv3] ||= ext.rsv3
+        end
       end
 
       (allowed[:rsv1] || !frame.rsv1) &&

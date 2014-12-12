@@ -281,32 +281,8 @@ their use of RSV bits are not activated.
 #### *Session*
 
 The *Session* API must be implemented by both client and server sessions. It
-contains three methods: `valid_frame_rsv(frame)`,
-`process_incoming_message(message)` and `process_outgoing_message(message)`.
-
-```rb
-session.valid_frame_rsv(frame)
-```
-
-This takes a *Frame* as defined above, and returns a response indicating which
-RSV bits are allowed to be set on the frame. (If a session is having this method
-called, the session is active and should its bits can be used.) For example, the
-`permessage-deflate` extension allows the RSV1 bit to be set on `text` and
-`binary` frames, and implements this method like this:
-
-```rb
-def valid_frame_rsv(frame)
-  if [1, 2].include?(frame.opcode)
-    {:rsv1 => true, :rsv2 => false, :rsv3 => false}
-  else
-    {:rsv1 => false, :rsv2 => false, :rsv3 => false}
-  end
-end
-```
-
-Note that returning `false` for an `rsvX` field does not mean the session is
-forbidding its use; the framework assumes all RSV bits are banned unless a
-session indicates otherwise.
+contains three methods: `process_incoming_message(message)` and
+`process_outgoing_message(message)`.
 
 ```rb
 message = session.process_incoming_message(message)
