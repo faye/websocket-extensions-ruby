@@ -1,3 +1,5 @@
+require 'strscan'
+
 module WebSocket
   class Extensions
 
