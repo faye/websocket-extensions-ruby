@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = 'websocket-extensions'
-  s.version           = '0.1.0'
+  s.version           = '0.1.1'
   s.summary           = 'Generic extension manager for WebSocket connections'
   s.author            = 'James Coglan'
   s.email             = 'jcoglan@gmail.com'
@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.rdoc_options      = %w[--main README.md --markup markdown]
   s.require_paths     = %w[lib]
 
-  s.files = %w[README.md] + Dir.glob('lib/**/*.rb')
+  s.files = %w[README.md CHANGELOG.md] + Dir.glob('lib/**/*.rb')
 
   s.add_development_dependency 'rspec'
 end
