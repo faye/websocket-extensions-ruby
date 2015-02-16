@@ -155,6 +155,8 @@ module WebSocket
     end
 
     def close
+      return unless @sessions
+
       @sessions.each do |ext, session|
         session.close rescue nil
       end
