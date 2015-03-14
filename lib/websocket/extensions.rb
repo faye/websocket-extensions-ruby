@@ -98,19 +98,23 @@ module WebSocket
     end
 
     def generate_response(header)
-      offers   = Parser.parse_header(header)
       sessions = []
       response = []
 
-      @in_order.each do |ext|
-        offer = offers.by_name(ext.name)
-        next if offer.empty? or reserved?(ext)
+      begin
+        offers = Parser.parse_header(header)
 
-        next unless session = ext.create_server_session(offer)
+        @in_order.each do |ext|
+          offer = offers.by_name(ext.name)
+          next if offer.empty? or reserved?(ext)
 
-        reserve(ext)
-        sessions.push([ext, session])
-        response.push(Parser.serialize_params(ext.name, session.generate_response))
+          next unless session = ext.create_server_session(offer)
+
+          reserve(ext)
+          sessions.push([ext, session])
+          response.push(Parser.serialize_params(ext.name, session.generate_response))
+        end
+      rescue
       end
 
       @sessions = sessions

@@ -325,11 +325,14 @@ describe WebSocket::Extensions do
         expect(@extensions.generate_response("deflate, tar")).to eq "deflate; mode=compress"
       end
 
+      it "returns an empty response if the header is invalid" do
+        expect(@extensions.generate_response("x-webkit- -frame")).to be_nil
+      end
+
       it "returns a response for potentially conflicting extensions if their preceeding extensions don't build a session" do
         allow(@ext).to receive(:create_server_session).and_return(nil)
         expect(@extensions.generate_response("deflate, tar")).to eq "tar; gzip"
       end
-
     end
   end
 end
