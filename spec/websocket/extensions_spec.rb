@@ -325,8 +325,8 @@ describe WebSocket::Extensions do
         expect(@extensions.generate_response("deflate, tar")).to eq "deflate; mode=compress"
       end
 
-      it "returns an empty response if the header is invalid" do
-        expect(@extensions.generate_response("x-webkit- -frame")).to be_nil
+      it "raises an error if the header is invalid" do
+        expect { @extensions.generate_response("x-webkit- -frame") }.to raise_error
       end
 
       it "returns a response for potentially conflicting extensions if their preceeding extensions don't build a session" do
