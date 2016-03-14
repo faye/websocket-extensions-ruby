@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.rdoc_options      = %w[--main README.md --markup markdown]
   s.require_paths     = %w[lib]
 
-  s.files = %w[README.md CHANGELOG.md] + Dir.glob('lib/**/*.rb')
+  s.files = %w[README.md LICENSE.md CHANGELOG.md] + Dir.glob('lib/**/*.rb')
 
   s.add_development_dependency 'rspec'
 end
