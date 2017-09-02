@@ -329,7 +329,7 @@ describe WebSocket::Extensions do
         expect { @extensions.generate_response("x-webkit- -frame") }.to raise_error
       end
 
-      it "returns a response for potentially conflicting extensions if their preceeding extensions don't build a session" do
+      it "returns a response for potentially conflicting extensions if their preceding extensions don't build a session" do
         allow(@ext).to receive(:create_server_session).and_return(nil)
         expect(@extensions.generate_response("deflate, tar")).to eq "tar; gzip"
       end
