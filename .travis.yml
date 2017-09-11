@@ -11,5 +11,8 @@ rvm:
   - jruby-19mode
   - jruby-9
 
+before_install:
+  - '[[ "$(ruby --version)" == *"1.9.3"* ]] && gem update --system 2.4.8 || true'
+
 script:
   - bundle exec rspec -c spec
