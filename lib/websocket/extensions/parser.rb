@@ -38,7 +38,7 @@ module WebSocket
             else
               data = true
             end
-            if data =~ NUMBER
+            if data != true and data =~ NUMBER
               data = data =~ /\./ ? data.to_f : data.to_i(10)
             end
 
