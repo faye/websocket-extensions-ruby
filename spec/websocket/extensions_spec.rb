@@ -326,7 +326,7 @@ describe WebSocket::Extensions do
       end
 
       it "raises an error if the header is invalid" do
-        expect { @extensions.generate_response("x-webkit- -frame") }.to raise_error
+        expect { @extensions.generate_response("x-webkit- -frame") }.to raise_error(WebSocket::Extensions::Parser::ParseError)
       end
 
       it "returns a response for potentially conflicting extensions if their preceding extensions don't build a session" do
