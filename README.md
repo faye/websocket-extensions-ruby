@@ -309,5 +309,5 @@ the session to release any resources it's using.
 
 ## Examples
 
-* Consumer: [websocket-driver](https://github.com/faye/websocket-driver-ruby)
-* Provider: [permessage-deflate](https://github.com/faye/permessage-deflate-ruby)
+- Consumer: [websocket-driver](https://github.com/faye/websocket-driver-ruby)
+- Provider: [permessage-deflate](https://github.com/faye/permessage-deflate-ruby)
