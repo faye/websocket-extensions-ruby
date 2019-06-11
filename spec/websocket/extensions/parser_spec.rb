@@ -20,60 +20,60 @@ describe WebSocket::Extensions::Parser do
 
     it "parses one offer with no params" do
       expect(parse 'a').to eq [
-        {:name => "a", :params => {}}
+        { :name => "a", :params => {} }
       ]
     end
 
     it "parses two offers with no params" do
       expect(parse 'a, b').to eq [
-        {:name => "a", :params => {}}, {:name => "b", :params => {}}
+        { :name => "a", :params => {} }, { :name => "b", :params => {} }
       ]
     end
 
     it "parses a duplicate offer name" do
       expect(parse 'a, a').to eq [
-        {:name => "a", :params => {}},
-        {:name => "a", :params => {}}
+        { :name => "a", :params => {} },
+        { :name => "a", :params => {} }
       ]
     end
 
     it "parses a flag" do
       expect(parse 'a; b').to eq [
-        {:name => "a", :params => {"b" => true}}
+        { :name => "a", :params => { "b" => true } }
       ]
     end
 
     it "parses an unquoted param" do
       expect(parse 'a; b=1').to eq [
-        {:name => "a", :params => {"b" => 1}}
+        { :name => "a", :params => { "b" => 1 } }
       ]
     end
 
     it "parses a quoted param" do
       expect(parse 'a; b="hi, \"there"').to eq [
-        {:name => "a", :params => {"b" => 'hi, "there'}}
+        { :name => "a", :params => { "b" => 'hi, "there' } }
       ]
     end
 
     it "parses multiple params" do
       expect(parse 'a; b; c=1; d="hi"').to eq [
-        {:name => "a", :params => {"b" => true, "c" => 1, "d" => "hi"}}
+        { :name => "a", :params => { "b" => true, "c" => 1, "d" => "hi" } }
       ]
     end
 
     it "parses duplicate params" do
       expect(parse 'a; b; c=1; b="hi"').to eq [
-        {:name => "a", :params => {"b" => [true, "hi"], "c" => 1}}
+        { :name => "a", :params => { "b" => [true, "hi"], "c" => 1 } }
       ]
     end
 
     it "parses multiple complex offers" do
       expect(parse 'a; b=1, c, b; d, c; e="hi, there"; e, a; b').to eq [
-        {:name => "a", :params => {"b" => 1}},
-        {:name => "c", :params => {}},
-        {:name => "b", :params => {"d" => true}},
-        {:name => "c", :params => {"e" => ['hi, there', true]}},
-        {:name => "a", :params => {"b" => true}}
+        { :name => "a", :params => { "b" => 1 } },
+        { :name => "c", :params => {} },
+        { :name => "b", :params => { "d" => true } },
+        { :name => "c", :params => { "e" => ['hi, there', true] } },
+        { :name => "a", :params => { "b" => true } }
       ]
     end
   end

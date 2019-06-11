@@ -227,8 +227,8 @@ then the `permessage-deflate` extension will receive the call:
 
 ```rb
 ext.create_server_session([
-  {'server_no_context_takeover' => true, 'server_max_window_bits' => 8},
-  {'server_max_window_bits' => 15}
+  { 'server_no_context_takeover' => true, 'server_max_window_bits' => 8 },
+  { 'server_max_window_bits' => 15 }
 ])
 ```
 
@@ -244,8 +244,8 @@ implement the following methods, as well as the *Session* API listed below.
 ```rb
 client_session.generate_offer
 # e.g.  -> [
-#            {'server_no_context_takeover' => true, 'server_max_window_bits' => 8},
-#            {'server_max_window_bits' => 15}
+#            { 'server_no_context_takeover' => true, 'server_max_window_bits' => 8 },
+#            { 'server_max_window_bits' => 15 }
 #          ]
 ```
 
@@ -270,7 +270,7 @@ must implement the following methods, as well as the *Session* API listed below.
 
 ```rb
 server_session.generate_response
-# e.g.  -> {'server_max_window_bits' => 8}
+# e.g.  -> { 'server_max_window_bits' => 8 }
 ```
 
 This returns the set of parameters the server session wants to send in its

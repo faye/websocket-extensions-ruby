@@ -7,9 +7,9 @@ module WebSocket
       TOKEN    = /([!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+)/
       NOTOKEN  = /([^!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z])/
       QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"])*)"/
-      PARAM    = %r{#{TOKEN.source}(?:=(?:#{TOKEN.source}|#{QUOTED.source}))?}
-      EXT      = %r{#{TOKEN.source}(?: *; *#{PARAM.source})*}
-      EXT_LIST = %r{^#{EXT.source}(?: *, *#{EXT.source})*$}
+      PARAM    = %r{#{ TOKEN.source }(?:=(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
+      EXT      = %r{#{ TOKEN.source }(?: *; *#{ PARAM.source })*}
+      EXT_LIST = %r{^#{ EXT.source }(?: *, *#{ EXT.source })*$}
       NUMBER   = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/
 
       ParseError = Class.new(ArgumentError)
@@ -19,7 +19,7 @@ module WebSocket
         return offers if header == '' or header.nil?
 
         unless header =~ EXT_LIST
-          raise ParseError, "Invalid Sec-WebSocket-Extensions header: #{header}"
+          raise ParseError, "Invalid Sec-WebSocket-Extensions header: #{ header }"
         end
 
         scanner = StringScanner.new(header)

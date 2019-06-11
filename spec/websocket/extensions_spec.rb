@@ -39,7 +39,7 @@ describe WebSocket::Extensions do
 
   describe "client sessions" do
     before do
-      @offer = {"mode" => "compress"}
+      @offer = { "mode" => "compress" }
       allow(@ext).to receive(:create_client_session).and_return(@session)
       allow(@session).to receive(:generate_offer).and_return(@offer)
       @extensions.add(@ext)
@@ -248,7 +248,7 @@ describe WebSocket::Extensions do
 
   describe "server sessions" do
     before do
-      @response = {"mode" => "compress"}
+      @response = { "mode" => "compress" }
       allow(@ext).to receive(:create_server_session).and_return(@session)
       allow(@session).to receive(:generate_response).and_return(@response)
 
@@ -269,12 +269,12 @@ describe WebSocket::Extensions do
 
     describe :generate_response do
       it "asks the extension for a server session with the offer" do
-        expect(@ext).to receive(:create_server_session).with([{"flag" => true}]).exactly(1).and_return(@session)
+        expect(@ext).to receive(:create_server_session).with([{ "flag" => true }]).exactly(1).and_return(@session)
         @extensions.generate_response("deflate; flag")
       end
 
       it "asks the extension for a server session with multiple offers" do
-        expect(@ext).to receive(:create_server_session).with([{"a" => true}, {"b" => true}]).exactly(1).and_return(@session)
+        expect(@ext).to receive(:create_server_session).with([{ "a" => true }, { "b" => true }]).exactly(1).and_return(@session)
         @extensions.generate_response("deflate; a, deflate; b")
       end
 

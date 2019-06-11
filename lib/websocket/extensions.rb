@@ -38,7 +38,7 @@ module WebSocket
       end
 
       if @by_name.has_key?(ext.name)
-        raise TypeError, %Q{An extension with name "#{ext.name}" is already registered}
+        raise TypeError, %Q{An extension with name "#{ ext.name }" is already registered}
       end
 
       @by_name[ext.name] = ext
@@ -78,18 +78,18 @@ module WebSocket
 
       responses.each_offer do |name, params|
         unless record = @index[name]
-          raise ExtensionError, %Q{Server sent am extension response for unknown extension "#{name}"}
+          raise ExtensionError, %Q{Server sent am extension response for unknown extension "#{ name } }
         end
 
         ext, session = *record
 
         if reserved = reserved?(ext)
-          raise ExtensionError, %Q{Server sent two extension responses that use the RSV#{reserved[0]} } +
-                               %Q{ bit: "#{reserved[1]}" and "#{ext.name}"}
+          raise ExtensionError, %Q{Server sent two extension responses that use the RSV#{ reserved[0] }} +
+                                %Q{bit: "#{ reserved[1] }" and "#{ ext.name }"}
         end
 
         unless session.activate(params) == true
-          raise ExtensionError, %Q{Server send unacceptable extension parameters: #{Parser.serialize_params(name, params)}}
+          raise ExtensionError, %Q{Server send unacceptable extension parameters: #{ Parser.serialize_params(name, params) }}
         end
 
         reserve(ext)
@@ -118,7 +118,7 @@ module WebSocket
     end
 
     def valid_frame_rsv(frame)
-      allowed = {:rsv1 => false, :rsv2 => false, :rsv3 => false}
+      allowed = { :rsv1 => false, :rsv2 => false, :rsv3 => false }
 
       if MESSAGE_OPCODES.include?(frame.opcode)
         @sessions.each do |ext, session|
