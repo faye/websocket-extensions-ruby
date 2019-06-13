@@ -1,6 +1,7 @@
 ### 0.1.4 / 2019-06-10
 
 - Fix a deprecation warning for using the `=~` operator on `true`
+- Change license from MIT to Apache 2.0
 
 ### 0.1.3 / 2017-11-11
 
