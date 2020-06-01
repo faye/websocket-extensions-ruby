@@ -76,6 +76,12 @@ describe WebSocket::Extensions::Parser do
         { :name => "a", :params => { "b" => true } }
       ]
     end
+
+    it "rejects a string missing its closing quote" do
+      expect {
+        parse "foo; bar=\"fooa\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a"
+      }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+    end
   end
 
   describe :serialize_params do

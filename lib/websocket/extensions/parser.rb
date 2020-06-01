@@ -6,7 +6,7 @@ module WebSocket
     class Parser
       TOKEN    = /([!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+)/
       NOTOKEN  = /([^!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z])/
-      QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"])*)"/
+      QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"\\])*)"/
       PARAM    = %r{#{ TOKEN.source }(?:=(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
       EXT      = %r{#{ TOKEN.source }(?: *; *#{ PARAM.source })*}
       EXT_LIST = %r{^#{ EXT.source }(?: *, *#{ EXT.source })*$}
