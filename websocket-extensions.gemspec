@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = 'websocket-extensions'
-  s.version  = '0.1.4'
+  s.version  = '0.1.5'
   s.summary  = 'Generic extension manager for WebSocket connections'
   s.author   = 'James Coglan'
   s.email    = 'jcoglan@gmail.com'

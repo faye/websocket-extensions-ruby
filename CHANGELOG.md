@@ -1,3 +1,7 @@
+### 0.1.5 / 2020-06-02
+
+- Remove a ReDoS vulnerability in the header parser (CVE-2020-7663)
+
 ### 0.1.4 / 2019-06-10
 
 - Fix a deprecation warning for using the `=~` operator on `true`
