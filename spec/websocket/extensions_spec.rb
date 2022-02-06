@@ -134,18 +134,18 @@ describe WebSocket::Extensions do
       end
 
       it "activates one session with a boolean param" do
-        expect(@session).to receive(:activate).with("gzip" => true).exactly(1).and_return(true)
+        expect(@session).to receive(:activate).with({ "gzip" => true }).exactly(1).and_return(true)
         @extensions.activate("deflate; gzip")
       end
 
       it "activates one session with a string param" do
-        expect(@session).to receive(:activate).with("mode" => "compress").exactly(1).and_return(true)
+        expect(@session).to receive(:activate).with({ "mode" => "compress" }).exactly(1).and_return(true)
         @extensions.activate("deflate; mode=compress")
       end
 
       it "activate multiple sessions" do
-        expect(@session).to receive(:activate).with("a" => true).exactly(1).and_return(true)
-        expect(@nonconflict_session).to receive(:activate).with("b" => true).exactly(1).and_return(true)
+        expect(@session).to receive(:activate).with({ "a" => true }).exactly(1).and_return(true)
+        expect(@nonconflict_session).to receive(:activate).with({ "b" => true }).exactly(1).and_return(true)
         @extensions.activate("deflate; a, reverse; b")
       end
 
