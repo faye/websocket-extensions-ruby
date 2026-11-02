@@ -43,8 +43,20 @@ describe WebSocket::Extensions::Parser do
       ]
     end
 
+    it "parses a flag with tabs around ';'" do
+      expect(parse "a\t;\tb").to eq [
+        { :name => "a", :params => { "b" => true } }
+      ]
+    end
+
     it "parses an unquoted param" do
       expect(parse 'a; b=1').to eq [
+        { :name => "a", :params => { "b" => 1 } }
+      ]
+    end
+
+    it "parses an unquoted param with space around '='" do
+      expect(parse 'a; b = 1').to eq [
         { :name => "a", :params => { "b" => 1 } }
       ]
     end
@@ -68,7 +80,7 @@ describe WebSocket::Extensions::Parser do
     end
 
     it "parses multiple complex offers" do
-      expect(parse 'a; b=1, c, b; d, c; e="hi, there"; e, a; b').to eq [
+      expect(parse 'a; b=1, c, b ; d , c; e = "hi, there"; e, a ; b').to eq [
         { :name => "a", :params => { "b" => 1 } },
         { :name => "c", :params => {} },
         { :name => "b", :params => { "d" => true } },
@@ -77,10 +89,18 @@ describe WebSocket::Extensions::Parser do
       ]
     end
 
-    it "rejects a string missing its closing quote" do
-      expect {
-        parse "foo; bar=\"fooa\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a"
-      }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+    describe "ReDoS avoidance" do
+      it "rejects a long sequence of LWS" do
+        expect {
+          parse "foo; bar=                              \""
+        }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+      end
+
+      it "rejects a long sequence of quote-escapes" do
+        expect {
+          parse "foo; bar=\"fooa\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a\\a"
+        }.to raise_error(WebSocket::Extensions::Parser::ParseError)
+      end
     end
   end
 

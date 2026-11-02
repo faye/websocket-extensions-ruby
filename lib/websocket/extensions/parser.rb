@@ -3,14 +3,65 @@ require 'strscan'
 module WebSocket
   class Extensions
 
+    # RFC 6455 grammar rules:
+    #
+    #       Sec-WebSocket-Extensions = extension-list
+    #
+    #       extension-list    = 1#extension
+    #
+    #       extension         = extension-token *( ";" extension-param )
+    #
+    #       extension-token   = registered-token
+    #
+    #       registered-token  = token
+    #
+    #       extension-param   = token [ "=" (token | quoted-string) ]
+    #            ; When using the quoted-string syntax variant, the value
+    #            ; after quoted-string unescaping MUST conform to the
+    #            ; 'token' ABNF.
+    #
+    # These make use of the following rules from RFC 2616:
+    #
+    #       token          = 1*<any CHAR except CTLs or separators>
+    #
+    #       separators     = "(" | ")" | "<" | ">" | "@"
+    #                      | "," | ";" | ":" | "\" | <">
+    #                      | "/" | "[" | "]" | "?" | "="
+    #                      | "{" | "}" | SP | HT
+    #
+    #       quoted-string  = ( <"> *(qdtext | quoted-pair ) <"> )
+    #
+    #       qdtext         = <any TEXT except <">>
+    #
+    #       quoted-pair    = "\" CHAR
+    #
+    #       CHAR           = <any US-ASCII character (octets 0 - 127)>
+    #
+    #       CTL            = <any US-ASCII control character
+    #                        (octets 0 - 31) and DEL (127)>
+    #
+    #       TEXT           = <any OCTET except CTLs, but including LWS>
+    #
+    #       LWS            = [CRLF] 1*( SP | HT )
+    #
+    #       SP             = <US-ASCII SP, space (32)>
+    #
+    #       HT             = <US-ASCII HT, horizontal-tab (9)>
+
     class Parser
       TOKEN    = /([!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+)/
       NOTOKEN  = /([^!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z])/
       QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"\\])*)"/
-      PARAM    = %r{#{ TOKEN.source }(?:=(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
-      EXT      = %r{#{ TOKEN.source }(?: *; *#{ PARAM.source })*}
-      EXT_LIST = %r{^#{ EXT.source }(?: *, *#{ EXT.source })*$}
-      NUMBER   = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/
+      NUMBER   = /\A-?(0|[1-9][0-9]*)(\.[0-9]+)?\z/
+
+      LWS      = /[ \t]*(?:\r\n[ \t]+)*/
+      EQL      = %r{#{ LWS.source }=#{ LWS.source }}
+      SEM      = %r{#{ LWS.source };#{ LWS.source }}
+      COM      = %r{#{ LWS.source },#{ LWS.source }}
+
+      PARAM    = %r{#{ TOKEN.source }(?:#{ EQL.source }(?:#{ TOKEN.source }|#{ QUOTED.source }))?}
+      EXT      = %r{#{ TOKEN.source }(?:#{ SEM.source }#{ PARAM.source })*}
+      EXT_LIST = %r{\A#{ EXT.source }(?:#{ COM.source }#{ EXT.source })*\z}
 
       ParseError = Class.new(ArgumentError)
 
@@ -51,9 +102,10 @@ module WebSocket
 
           offers.push(name, offer)
 
-          scanner.scan(/ *, */)
+          scanner.scan(COM)
           value = scanner.scan(EXT)
         end
+
         offers
       end
 
