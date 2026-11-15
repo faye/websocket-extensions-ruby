@@ -3,13 +3,23 @@ module WebSocket
 
     autoload :Parser, File.expand_path('../extensions/parser', __FILE__)
 
-    ExtensionError = Class.new(ArgumentError)
+    class ExtensionError < ArgumentError
+      attr_reader :type
+
+      def initialize(message, type = nil)
+        super(message)
+        @type = type
+      end
+    end
 
     MESSAGE_OPCODES = [1, 2]
 
-    def initialize
+    def initialize(options = {})
       @rsv1 = @rsv2 = @rsv3 = nil
 
+      validate_options(options, [:max_length])
+
+      @options  = options
       @by_name  = {}
       @in_order = []
       @sessions = []
@@ -51,7 +61,9 @@ module WebSocket
       index    = {}
 
       @in_order.each do |ext|
-        session = ext.create_client_session
+        arity   = ext.method(:create_client_session).arity
+        session = (arity == 0) ? ext.create_client_session : ext.create_client_session(@options)
+
         next unless session
 
         record = [ext, session]
@@ -106,7 +118,10 @@ module WebSocket
         offer = offers.by_name(ext.name)
         next if offer.empty? or reserved?(ext)
 
-        next unless session = ext.create_server_session(offer)
+        arity   = ext.method(:create_server_session).arity
+        session = (arity == 1) ? ext.create_server_session(offer) : ext.create_server_session(offer, @options)
+
+        next unless session
 
         reserve(ext)
         sessions.push([ext, session])
@@ -139,7 +154,8 @@ module WebSocket
         begin
           session.process_incoming_message(msg)
         rescue => error
-          raise ExtensionError, [ext.name, error.message].join(': ')
+          type = error.respond_to?(:type) ? error.type : nil
+          raise ExtensionError.new([ext.name, error.message].join(': '), type)
         end
       end
     end
@@ -149,7 +165,8 @@ module WebSocket
         begin
           session.process_outgoing_message(msg)
         rescue => error
-          raise ExtensionError, [ext.name, error.message].join(': ')
+          type = error.respond_to?(:type) ? error.type : nil
+          raise ExtensionError.new([ext.name, error.message].join(': '), type)
         end
       end
     end
@@ -163,6 +180,14 @@ module WebSocket
     end
 
   private
+
+    def validate_options(options, valid_keys)
+      options.keys.each do |key|
+        unless valid_keys.include?(key)
+          raise ExtensionError, "Unrecognized option: #{ key.inspect }"
+        end
+      end
+    end
 
     def reserve(ext)
       @rsv1 ||= ext.rsv1 && ext.name

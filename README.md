@@ -82,6 +82,14 @@ exts = WebSocket::Extensions.new
 exts.add(PermessageDeflate)
 ```
 
+The `WebSocket::Extensions.new` constructor takes an optional argument, which is
+a hash containing options that will be passed down to individual extensions. The
+supported options are:
+
+- `:max_length` - the maximum allowed size of incoming message frames, in bytes.
+  Individual extensions should ensure that messages do not exceed this size, or
+  allocate memory beyond this amount, as a result of processing the message.
+
 In the following examples, `exts` refers to this `Extensions` instance.
 
 #### Client sessions
@@ -205,18 +213,21 @@ An `Extension` is any object that has the following properties:
 It must also implement the following methods:
 
 ```rb
-ext.create_client_session
+ext.create_client_session(options)
 ```
 
-This returns a *ClientSession*, whose interface is defined below.
+This returns a *ClientSession*, whose interface is defined below. `options` is
+the value of the optional argument that was passed to
+`WebSocket::Extensions.new`.
 
 ```rb
-ext.create_server_session(offers)
+ext.create_server_session(offers, options)
 ```
 
 This takes an array of offer params and returns a *ServerSession*, whose
-interface is defined below. For example, if the client handshake contains the
-offer header:
+interface is defined below. `options` is the value of the optional argument that
+was passed to `WebSocket::Extensions.new`. For example, if the client handshake
+contains the offer header:
 
 ```
 Sec-WebSocket-Extensions: permessage-deflate; server_no_context_takeover; server_max_window_bits=8, \
@@ -229,7 +240,7 @@ then the `permessage-deflate` extension will receive the call:
 ext.create_server_session([
   { 'server_no_context_takeover' => true, 'server_max_window_bits' => 8 },
   { 'server_max_window_bits' => 15 }
-])
+], options)
 ```
 
 The extension must decide which set of parameters it wants to accept, if any,
@@ -238,8 +249,9 @@ otherwise.
 
 #### *ClientSession*
 
-A *ClientSession* is the type returned by `ext.create_client_session`. It must
-implement the following methods, as well as the *Session* API listed below.
+A *ClientSession* is the type returned by `ext.create_client_session(options)`.
+It must implement the following methods, as well as the *Session* API listed
+below.
 
 ```rb
 client_session.generate_offer
@@ -265,8 +277,9 @@ the framework will interpret this as the client rejecting the response, and will
 
 #### *ServerSession*
 
-A *ServerSession* is the type returned by `ext.create_server_session(offers)`. It
-must implement the following methods, as well as the *Session* API listed below.
+A *ServerSession* is the type returned by `ext.create_server_session(offers,
+options)`. It must implement the following methods, as well as the *Session* API
+listed below.
 
 ```rb
 server_session.generate_response

@@ -5,7 +5,7 @@ describe WebSocket::Extensions do
   Message = Struct.new(:frames)
 
   before do
-    @extensions = WebSocket::Extensions.new
+    @extensions = WebSocket::Extensions.new(:max_length => 0x3fff)
 
     @ext     = double(:extension, :name => "deflate", :type => "permessage", :rsv1 => true, :rsv2 => false, :rsv3 => false)
     @session = double(:session)
@@ -61,7 +61,7 @@ describe WebSocket::Extensions do
 
     describe :generate_offer do
       it "asks the extension to create a client session" do
-        expect(@ext).to receive(:create_client_session).exactly(1).and_return(@session)
+        expect(@ext).to receive(:create_client_session).with({ :max_length => 0x3fff }).exactly(1).and_return(@session)
         @extensions.generate_offer
       end
 
@@ -269,12 +269,12 @@ describe WebSocket::Extensions do
 
     describe :generate_response do
       it "asks the extension for a server session with the offer" do
-        expect(@ext).to receive(:create_server_session).with([{ "flag" => true }]).exactly(1).and_return(@session)
+        expect(@ext).to receive(:create_server_session).with([{ "flag" => true }], { :max_length => 0x3fff }).exactly(1).and_return(@session)
         @extensions.generate_response("deflate; flag")
       end
 
       it "asks the extension for a server session with multiple offers" do
-        expect(@ext).to receive(:create_server_session).with([{ "a" => true }, { "b" => true }]).exactly(1).and_return(@session)
+        expect(@ext).to receive(:create_server_session).with([{ "a" => true }, { "b" => true }], { :max_length => 0x3fff }).exactly(1).and_return(@session)
         @extensions.generate_response("deflate; a, deflate; b")
       end
 
