@@ -1,3 +1,10 @@
+### 0.2.0 / 2026-11-16
+
+- Add an `options` argument to the `WebSocket::Extensions.new` constructor, to
+  provide configuration parameters that should be passed on to individual
+  extensions
+- Extend the header field parser to handle whitespace as required by the spec
+
 ### 0.1.5 / 2020-06-02
 
 - Remove a ReDoS vulnerability in the header parser (CVE-2020-7663)
