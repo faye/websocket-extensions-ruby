@@ -12,14 +12,24 @@ module WebSocket
       end
     end
 
+    def self.validate_options(options, valid_keys)
+      options = options || {}
+
+      options.keys.each do |key|
+        unless valid_keys.include?(key)
+          raise ExtensionError, "Unrecognized option: #{ key.inspect }"
+        end
+      end
+
+      options
+    end
+
     MESSAGE_OPCODES = [1, 2]
 
     def initialize(options = {})
       @rsv1 = @rsv2 = @rsv3 = nil
 
-      validate_options(options, [:max_length])
-
-      @options  = options
+      @options  = Extensions.validate_options(options, [:max_length])
       @by_name  = {}
       @in_order = []
       @sessions = []
@@ -180,14 +190,6 @@ module WebSocket
     end
 
   private
-
-    def validate_options(options, valid_keys)
-      options.keys.each do |key|
-        unless valid_keys.include?(key)
-          raise ExtensionError, "Unrecognized option: #{ key.inspect }"
-        end
-      end
-    end
 
     def reserve(ext)
       @rsv1 ||= ext.rsv1 && ext.name
